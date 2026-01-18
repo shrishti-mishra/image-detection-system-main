@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Results - Advanced Image Detection System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="fas fa-camera-retro"></i> Advanced Image Detection System
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}"><i class="fas fa-home"></i> Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('upload') }}"><i class="fas fa-upload"></i> Upload</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-12">
+                <h2 class="mb-4"><i class="fas fa-chart-bar"></i> Analysis Results</h2>
+                <div class="alert alert-success mb-4">
+                    <i class="fas fa-check-circle"></i> Analysis completed successfully!
+                </div>
+                
+                <ul class="nav nav-tabs" id="resultTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab">
+                            <i class="fas fa-home"></i> Overview
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="objects-tab" data-bs-toggle="tab" data-bs-target="#objects" type="button" role="tab">
+                            <i class="fas fa-object-group"></i> Detected Objects
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="location-tab" data-bs-toggle="tab" data-bs-target="#location" type="button" role="tab">
+                            <i class="fas fa-map-marker-alt"></i> Location
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="visualization-tab" data-bs-toggle="tab" data-bs-target="#visualization" type="button" role="tab">
+                            <i class="fas fa-eye"></i> Visualization
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="description-tab" data-bs-toggle="tab" data-bs-target="#description" type="button" role="tab">
+                            <i class="fas fa-file-alt"></i> Description
+                        </button>
+                    </li>
+                </ul>
+                
+                <div class="tab-content mt-3" id="resultTabsContent">
+                    <!-- Overview Tab -->
+                    <div class="tab-pane fade show active" id="overview" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="card shadow">
+                                    <div class="card-header bg-primary text-white">
+                                        <h5 class="mb-0"><i class="fas fa-image"></i> Annotated Image</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <img src="{{ results.images.annotated }}" class="img-fluid rounded" alt="Annotated image">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card mb-3 shadow-sm">
+                                    <div class="card-header bg-light">
+                                        <h5 class="mb-0"><i class="fas fa-tag"></i> Image Classification</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle mb-2 text-primary">{{ results.classification.class }}</h6>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-primary" role="progressbar"
+                                                aria-valuenow="{{ (results.classification.confidence * 100)|round(2) }}" aria-valuemin="0" aria-valuemax="100"
+                                                data-progress="{{ (results.classification.confidence * 100)|round(2) }}">
+                                                {{ "%.2f"|format(results.classification.confidence * 100) }}%
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="card mb-3 shadow-sm">
+                                    <div class="card-header bg-light">
+                                        <h5 class="mb-0"><i class="fas fa-map-marker-alt"></i> Location</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle mb-2 text-primary">{{ results.location.name }}</h6>
+                                        {% if results.location.latitude and results.location.longitude %}
+                                        <p class="card-text">
+                                            <span class="badge bg-secondary">Lat: {{ results.location.latitude }}</span>
+                                            <span class="badge bg-secondary">Long: {{ results.location.longitude }}</span>
+                                        </p>
+                                        <a href="{{ results.maps_url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-external-link-alt"></i> View on Google Maps
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="card shadow-sm">
+                                    <div class="card-header bg-light">
+                                        <h5 class="mb-0"><i class="fas fa-info-circle"></i> Image Information</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-group list-group-flush">
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                Objects detected
+                                                <span class="badge bg-primary rounded-pill">{{ results.objects|length }}</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                Tags
+                                                <span class="badge bg-primary rounded-pill">{{ results.tags|length }}</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                
+                                <!-- Tags Section -->
+                                <div class="card mt-3 shadow-sm">
+                                    <div class="card-header bg-light">
+                                        <h5 class="mb-0"><i class="fas fa-tags"></i> Tags</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="tags-container">
+                                            {% for tag in results.tags %}
+                                            <span class="badge bg-secondary me-1 mb-1">{{ tag }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-md-12">
+                                <div class="card shadow">
+                                    <div class="card-header bg-primary text-white">
+                                        <h5 class="mb-0"><i class="fas fa-file-alt"></i> Description</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="card-text lead">{{ results.description }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Objects Tab -->
+                    <div class="tab-pane fade" id="objects" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="card shadow">
+                                    <div class="card-header bg-primary text-white">
+                                        <h5 class="mb-0"><i class="fas fa-object-group"></i> Annotated Image with Objects</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <img src="{{ results.images.annotated }}" class="img-fluid rounded" alt="Annotated satellite image">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card shadow">
+                                    <div class="card-header bg-primary text-white">
+                                        <h5 class="mb-0"><i class="fas fa-list"></i> Detected Objects</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        {% if results.objects %}
+                                        <div class="table-responsive">
+                                            <table class="table table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Object</th>
+                                                        <th>Confidence</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for obj in results.objects %}
+                                                    <tr>
+                                                        <td>
+                                                            <i class="fas fa-cube me-2"></i>
+                                                            <span class="fw-bold">{{ obj.class_name }}</span>
+                                                        </td>
+                                                        <td>
+                                                            <div class="progress">
+                                                                <div class="progress-bar bg-primary" role="progressbar"
+                                                                    aria-valuenow="{{ (obj.confidence * 100)|round(2) }}" 
+                                                                    aria-valuemin="0" aria-valuemax="100"
+                                                                    data-progress="{{ (obj.confidence * 100)|round(2) }}">
+                                                                    {{ "%.2f"|format(obj.confidence * 100) }}%
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        {% else %}
+                                        <div class="alert alert-info">
+                                            <i class="fas fa-info-circle"></i> No objects detected in this image.
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Location Tab -->
+                    <div class="tab-pane fade" id="location" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="card shadow">
+                                    <div class="card-header bg-primary text-white">
+                                        <h5 class="mb-0"><i class="fas fa-map"></i> Location Information</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="map" style="height: 600px; width: 100%; border-radius: 8px;"></div>
+                                    </div>
+                                </div>
+                                
+                                {% if results.location.is_landmark and results.location.history %}
+                                <div class="card shadow mt-3">
+                                    <div class="card-header bg-info text-white">
+                                        <h5 class="mb-0"><i class="fas fa-landmark"></i> Historical Information</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle mb-2 text-primary">{{ results.location.name }}</h6>
+                                        <p class="card-text">{{ results.location.history }}</p>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card mb-3 shadow-sm">
+                                    <div class="card-header bg-light">
+                                        <h5 class="mb-0"><i class="fas fa-info-circle"></i> Location Details</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle mb-3 text-primary">{{ results.location.name }}</h6>
+                                        {% if results.location.is_landmark %}
+                                        <div class="alert alert-success mb-3">
+                                            <i class="fas fa-landmark"></i> Famous Landmark Detected
+                                        </div>
+                                        {% endif %}
+                                        {% if results.location.latitude and results.location.longitude %}
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="me-3">
+                                                <i class="fas fa-map-pin fa-2x text-primary"></i>
+                                            </div>
+                                            <div>
+                                                <p class="mb-0"><strong>Latitude:</strong> {{ results.location.latitude }}</p>
+                                                <p class="mb-0"><strong>Longitude:</strong> {{ results.location.longitude }}</p>
+                                            </div>
+                                        </div>
+                                        <a href="{{ results.maps_url }}" target="_blank" class="btn btn-primary">
+                                            <i class="fas fa-external-link-alt"></i> View on Google Maps
+                                        </a>
+                                        {% else %}
+                                        <div class="alert alert-info">
+                                            <i class="fas fa-info-circle"></i> No precise coordinates available for this image.
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="card shadow-sm">
+                                    <div class="card-header bg-light">
+                                        <h5 class="mb-0"><i class="fas fa-link"></i> Related Information</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-group list-group-flush">
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <span><i class="fas fa-tag me-2"></i> Image classification</span>
+                                                <span class="badge bg-primary">{{ results.classification.class }}</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <span><i class="fas fa-object-group me-2"></i> Objects detected</span>
+                                                <span class="badge bg-primary rounded-pill">{{ results.objects|length }}</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <span><i class="fas fa-tags me-2"></i> Tags</span>
+                                                <span class="badge bg-primary rounded-pill">{{ results.tags|length }}</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Visualization Tab -->
+                    <div class="tab-pane fade" id="visualization" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-9">
+                                <div class="card shadow">
+                                    <div class="card-header bg-primary text-white">
+                                        <h5 class="mb-0"><i class="fas fa-eye"></i> Image Visualization</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn btn-outline-primary viz-option active" data-viz="annotated">
+                                                    <i class="fas fa-object-group"></i> Annotated
+                                                </button>
+                                                <button type="button" class="btn btn-outline-primary viz-option" data-viz="heatmap">
+                                                    <i class="fas fa-fire"></i> Heatmap
+                                                </button>
+                                                <button type="button" class="btn btn-outline-primary viz-option" data-viz="original">
+                                                    <i class="fas fa-image"></i> Original
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="viz-container">
+                                            <img id="annotatedImage" class="viz-image img-fluid rounded" src="{{ results.images.annotated }}" alt="Annotated image">
+                                            <img id="heatmapImage" class="viz-image img-fluid rounded d-none" src="{{ results.images.heatmap }}" alt="Heatmap">
+                                            <img id="originalImage" class="viz-image img-fluid rounded d-none" src="{{ results.images.original }}" alt="Original image">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card shadow-sm mb-3">
+                                    <div class="card-header bg-light">
+                                        <h5 class="mb-0"><i class="fas fa-info-circle"></i> Visualization Info</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-group list-group-flush">
+                                            <li class="list-group-item">
+                                                <i class="fas fa-object-group text-primary me-2"></i> <strong>Annotated:</strong> Shows detected objects with bounding boxes
+                                            </li>
+                                            <li class="list-group-item">
+                                                <i class="fas fa-fire text-primary me-2"></i> <strong>Heatmap:</strong> Shows areas of interest with heat intensity
+                                            </li>
+                                            <li class="list-group-item">
+                                                <i class="fas fa-image text-primary me-2"></i> <strong>Original:</strong> Shows the unmodified original image
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Description Tab -->
+                    <div class="tab-pane fade" id="description" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="card shadow">
+                                    <div class="card-header bg-primary text-white">
+                                        <h5 class="mb-0"><i class="fas fa-file-alt"></i> Generated Description</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="card-text lead">{{ results.description }}</p>
+                                        
+                                        <!-- Tags Section -->
+                                        <div class="mt-4">
+                                            <h6><i class="fas fa-tags"></i> Related Tags:</h6>
+                                            <div class="tags-container">
+                                                {% for tag in results.tags %}
+                                                <span class="badge bg-secondary me-1 mb-1">{{ tag }}</span>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card mb-3 shadow-sm">
+                                    <div class="card-header bg-light">
+                                        <h5 class="mb-0"><i class="fas fa-image"></i> Image Preview</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <img src="{{ results.images.annotated }}" class="img-fluid rounded" alt="Satellite image">
+                                    </div>
+                                </div>
+                                
+                                <div class="card shadow-sm">
+                                    <div class="card-header bg-light">
+                                        <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Analysis Summary</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-group list-group-flush">
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <span><i class="fas fa-tag me-2"></i> Classification</span>
+                                                <span class="badge bg-primary">{{ results.classification.class }}</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <span><i class="fas fa-map-marker-alt me-2"></i> Location</span>
+                                                <span class="badge bg-primary">{{ results.location.name }}</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <span><i class="fas fa-object-group me-2"></i> Objects</span>
+                                                <span class="badge bg-primary rounded-pill">{{ results.objects|length }}</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <span><i class="fas fa-tags me-2"></i> Tags</span>
+                                                <span class="badge bg-primary rounded-pill">{{ results.tags|length }}</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('upload') }}" class="btn btn-primary">
+                        <i class="fas fa-upload"></i> Upload Another Image
+                    </a>
+                    <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                        <i class="fas fa-home"></i> Back to Home
+                    </a>
+                    <a href="#" class="btn btn-success" onclick="window.print(); return false;">
+                        <i class="fas fa-print"></i> Print Results
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer mt-5 py-4 bg-dark text-white">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 text-center text-md-start">
+                    <h5><i class="fas fa-camera-retro"></i> Advanced Image Detection System</h5>
+                    <p class="small">AI-powered image analysis for any type of image</p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <p class="mb-0">Advanced Image Detection System &copy; 2023</p>
+                    <p class="small">All rights reserved</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="application/json" id="results-json">{{ results | tojson }}</script>
+    <script>
+        function setProgressWidths() {
+            document.querySelectorAll('.progress-bar[data-progress]').forEach(function(el){
+                var v = el.getAttribute('data-progress');
+                if (v) el.style.width = v + '%';
+            });
+        }
+        function initMap() {
+            var results = {};
+            try {
+                results = JSON.parse(document.getElementById('results-json').textContent);
+            } catch(e) {}
+            var hasCoords = !!(results.location && results.location.latitude && results.location.longitude);
+            var lat = hasCoords ? results.location.latitude : 20.5937;
+            var lng = hasCoords ? results.location.longitude : 78.9629;
+            var isLandmark = !!(results.location && results.location.is_landmark);
+            var mapTypeIdValue = isLandmark ? 'satellite' : 'roadmap';
+            var mapOptions = {
+                center: { lat: lat, lng: lng },
+                zoom: hasCoords ? 13 : 4,
+                mapTypeId: hasCoords ? mapTypeIdValue : 'roadmap'
+            };
+            if (window.google && window.google.maps) {
+                var map = new google.maps.Map(document.getElementById('map'), mapOptions);
+                if (hasCoords) {
+                    var marker = new google.maps.Marker({
+                        position: { lat: lat, lng: lng },
+                        map: map,
+                        title: results.location && results.location.name ? results.location.name : 'Location',
+                        animation: isLandmark ? google.maps.Animation.BOUNCE : null,
+                        icon: isLandmark ? { url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png', scaledSize: new google.maps.Size(50, 50) } : null
+                    });
+                    var infoWindow = new google.maps.InfoWindow({
+                        content: '<div style="text-align:center;"><h5>' + (results.location && results.location.name ? results.location.name : 'Location') + '</h5>' + (isLandmark ? '<span class="badge bg-info">Famous Landmark</span>' : '') + '</div>'
+                    });
+                    marker.addListener('click', function() { infoWindow.open(map, marker); });
+                    if (isLandmark) { infoWindow.open(map, marker); }
+                } else {
+                    var infoWindow = new google.maps.InfoWindow({
+                        content: '<div style="text-align:center;"><h6>Default view: India</h6></div>'
+                    });
+                    infoWindow.open(map);
+                }
+            }
+            setProgressWidths();
+        }
+        document.addEventListener('DOMContentLoaded', function(){
+            if (typeof initMapLeaflet === 'function') { initMapLeaflet(); }
+            initMap();
+        });
+    </script>
+    {% if google_maps_api_key %}
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&callback=initMap"></script>
+    {% else %}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        function initMapLeaflet() {
+            var results = {};
+            try {
+                results = JSON.parse(document.getElementById('results-json').textContent);
+            } catch(e) {}
+            var hasCoords = !!(results.location && results.location.latitude && results.location.longitude);
+            var lat = hasCoords ? results.location.latitude : 20.5937;
+            var lng = hasCoords ? results.location.longitude : 78.9629;
+            var map = L.map('map').setView([lat, lng], hasCoords ? 13 : 4);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+            if (hasCoords) {
+                var marker = L.marker([lat, lng]).addTo(map);
+                marker.bindPopup(results.location && results.location.name ? results.location.name : 'Location').openPopup();
+            }
+        }
+    </script>
+    {% endif %}
+</body>
+</html>

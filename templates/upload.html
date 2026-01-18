@@ -1,0 +1,39 @@
+<!-- upload.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload Image</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Satellite Detection System</h1>
+            <ul>
+                <li><a href="{{ url_for('index') }}">Home</a></li>
+                <li><a href="{{ url_for('upload') }}">Upload</a></li>
+                <li><a href="{{ url_for('results') }}">Results</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <h2>Upload Satellite Image</h2>
+            <form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data">
+                <input type="file" name="file" onchange="previewFile()" required>
+                <img id="preview" src="" alt="Image Preview" width="300" style="margin-top:20px;">
+                <br><br>
+                <button type="submit">Upload</button>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2023 Satellite Detection System</p>
+    </footer>
+</body>
+</html>

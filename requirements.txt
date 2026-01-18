@@ -1,0 +1,22 @@
+# Simplified Requirements - Easy to Install
+# Core Web Framework
+Flask>=2.0.1
+Werkzeug>=2.0.1
+
+# Image Processing (Simplified)
+opencv-python>=4.5.0
+Pillow>=8.3.2
+numpy>=1.20.0
+
+# Object Detection (YOLOv8 - Much Simpler!)
+ultralytics>=8.0.0
+
+# Location Services (Optional)
+geopy>=2.2.0
+
+# Environment Variables
+python-dotenv>=0.19.0
+
+# HTTP Requests (Optional)
+requests>=2.26.0
+
